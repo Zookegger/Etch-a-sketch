@@ -4,22 +4,21 @@ const DEFAULT_COLOR = "#000000";
 const grid = document.getElementById("grid");
 const body = document.getElementById("body");
 
-const clear = document.createElement('button');
-clear.innerText = "Clear";
-clear.addEventListener("mousedown", clearGrid);
+const clear = createButton("Clear canvas", clearGrid);
 
-const primaryColorPicker = document.createElement("input");
-const secondaryColorPicker = document.createElement("input");
-primaryColorPicker.type = "color";
-secondaryColorPicker.type = "color";
-primaryColorPicker.value = DEFAULT_COLOR;
-secondaryColorPicker.value = DEFAULT_COLOR;
+const primaryColorPicker = createColorPicker(DEFAULT_COLOR, (e) => currentPrimaryColor = e.target.value); 
+const secondaryColorPicker = createColorPicker(DEFAULT_COLOR, (e) => currentSecondaryColor = e.target.value);
+
+function createColorPicker(color, inputHandler) {
+    const colorPicker = document.createElement("input");
+    colorPicker.type = "color";
+    colorPicker.value = color;
+    colorPicker.addEventListener("input", inputHandler);
+    return colorPicker;
+}
 
 let currentPrimaryColor = primaryColorPicker.value;
 let currentSecondaryColor = secondaryColorPicker.value;
-
-primaryColorPicker.addEventListener("input", (e) => currentPrimaryColor = e.target.value);
-secondaryColorPicker.addEventListener("input", (e) => currentSecondaryColor = e.target.value);
 
 grid.addEventListener('contextmenu', (e) => e.preventDefault());
 
@@ -29,8 +28,8 @@ let rightMouseDown = false;
 
 document.body.onmousedown = (e) => {
     mouseDown = true;
-    if (e.button === 0) leftMouseDown = true;
-    if (e.button === 2) rightMouseDown = true;
+    leftMouseDown = (e.button === 0);
+    rightMouseDown = (e.button === 2) ;
 }
 document.body.onmouseup = () => {
     mouseDown = false;
@@ -38,16 +37,24 @@ document.body.onmouseup = () => {
     rightMouseDown = false;
 }
 
+function createButton(text, eventHandler) {
+    const button = document.createElement("button");
+    button.innerText = text;
+    button.addEventListener("mousedown", eventHandler);
+    return button;
+}
+
+
 function setupGrid(size) {
     grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
     grid.style.gridTemplateRows = `repeat(${size}, 1fr)`;
     
     grid.innerHTML = '';
-
+    
     for (let i = 0; i < (size * size); i++) {
         const pixel = document.createElement("div");
         pixel.classList.add("grid-pixel");
-    
+        
         pixel.addEventListener("mousedown", changeColor);
         pixel.addEventListener("mouseover", changeColor);
         grid.appendChild(pixel);
@@ -56,23 +63,11 @@ function setupGrid(size) {
 
 function changeColor(event) {
     if (event.type === "mousedown") {
-        if (event.button === 0) {
-            event.target.style.backgroundColor = currentPrimaryColor;
-            console.log("Right tap")
-        } else if (event.button === 2) {
-            event.target.style.backgroundColor = currentSecondaryColor;
-            console.log("left tap")
-        }
+        event.target.style.backgroundColor = (event.button === 0) ? currentPrimaryColor : currentSecondaryColor;
     }
     
     if (event.type === "mouseover" && mouseDown) {
-        if (leftMouseDown) {
-            event.target.style.backgroundColor = currentPrimaryColor;
-            console.log("Right drag")
-        } else if (rightMouseDown) {
-            event.target.style.backgroundColor = currentSecondaryColor;
-            console.log("left drag")
-        }
+        event.target.style.backgroundColor = (leftMouseDown) ? currentPrimaryColor : currentSecondaryColor;
     }
 }
 
@@ -82,7 +77,6 @@ function clearGrid() {
 }
 
 setupGrid(DEFAULT_SIZE);
-
 body.appendChild(clear);
 body.appendChild(primaryColorPicker);
 body.appendChild(secondaryColorPicker);
