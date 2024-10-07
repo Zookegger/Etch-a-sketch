@@ -1,15 +1,35 @@
 const DEFAULT_SIZE = 10;
 const DEFAULT_COLOR = "#000000";
-const DEFAULT_BUTTON_HEIGHT = 30;
+const DEFAULT_BUTTON_HEIGHT = 35;
 
 const grid = document.getElementById("grid");
 const body = document.getElementById("body");
 
 const buttonContainer = document.getElementById("button-container");
 const clear = createButton("Clear canvas", "clear-button", clearGrid);
-
 const primaryColorPicker = createColorPicker(DEFAULT_COLOR, "primaryColorPicker", (e) => currentPrimaryColor = e.target.value); 
 const secondaryColorPicker = createColorPicker(DEFAULT_COLOR, "secondaryColorPicker", (e) => currentSecondaryColor = e.target.value);
+const slider = document.createElement("input");
+slider.setAttribute("id", "slider");
+slider.type = "range";
+slider.min = "1"
+slider.max = "128";
+slider.step = "1";
+slider.value = 10;
+slider.addEventListener("input", () => {
+    sliderValue.value = slider.value;
+    setupGrid(slider.value);
+});
+
+const sliderValue = document.createElement("input");
+sliderValue.setAttribute("id", "sliderValue");
+sliderValue.type = "text";
+sliderValue.value = slider.value;
+sliderValue.addEventListener("input", () => {
+    const value = Math.max(slider.min, Math.min(slider.max, sliderValue.value));
+    slider.value = value;
+    setupGrid(value);
+})
 
 function createColorPicker(color, id, inputHandler) {
     const colorPicker = document.createElement("input");
@@ -50,6 +70,7 @@ function createButton(text, id, eventHandler) {
 
 const eraser = createButton("Eraser", "eraser-button", erase);
 eraser.style.backgroundColor = "#FF0000";
+eraser.style.color = "#FFFFFF";
 
 function setupGrid(size) {
     grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
@@ -77,21 +98,24 @@ function changeColor(event) {
     }
 }
 
-let eraserStatus = false; 
+let eraserStatus = true; 
 function erase(e) {
+    console.log(eraserStatus);
     eraserStatus = !eraserStatus;
     if (eraserStatus === false) {
         currentPrimaryColor = "#FFFFFF";
         eraser.style.backgroundColor = "#3ef32e";
+        eraser.style.color = "#000000";
     }
     if (eraserStatus === true) {
         eraser.style.backgroundColor = "#FF0000";
+        eraser.style.color = "#FFFFFF";
         currentPrimaryColor = primaryColorPicker.value;
     }
 }
 
 function clearGrid() {
-    setupGrid(DEFAULT_SIZE);
+    setupGrid(slider.value);
 }
 
 setupGrid(DEFAULT_SIZE);
@@ -101,8 +125,12 @@ eraser.style.height = `${DEFAULT_BUTTON_HEIGHT}px`;
 primaryColorPicker.style.height = `${DEFAULT_BUTTON_HEIGHT}px`;
 secondaryColorPicker.style.height = `${DEFAULT_BUTTON_HEIGHT}px`;
 
+sliderValue.style.width = '19px';
+
 buttonContainer.appendChild(clear);
 buttonContainer.appendChild(primaryColorPicker);
 buttonContainer.appendChild(secondaryColorPicker);
 buttonContainer.appendChild(eraser);
+buttonContainer.appendChild(slider);
+buttonContainer.appendChild(sliderValue);
 body.appendChild(buttonContainer);
