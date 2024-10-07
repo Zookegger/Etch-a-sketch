@@ -88,12 +88,27 @@ function setupGrid(size) {
     }
 }
 
+const randomColorButton = document.getElementById("secret-random-button");
+randomColorButton.addEventListener("click", (e) => {
+    randomColorMode = !randomColorMode;
+    console.log(`Random color mode: ${randomColorMode}`);
+});
+let randomColorMode = false;
+
 function changeColor(event) {
     if (event.type === "mousedown") {
+        if (randomColorMode) {
+            let randomColor = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})`
+            event.target.style.backgroundColor = (event.button === 0) ? randomColor : randomColor;
+        } else
         event.target.style.backgroundColor = (event.button === 0) ? currentPrimaryColor : currentSecondaryColor;
     }
     
     if (event.type === "mouseover" && mouseDown) {
+        if (randomColorMode) {
+            let randomColor = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})`
+            event.target.style.backgroundColor = (event.button === 0) ? randomColor : randomColor;
+        } else
         event.target.style.backgroundColor = (leftMouseDown) ? currentPrimaryColor : currentSecondaryColor;
     }
 }
@@ -102,6 +117,8 @@ let eraserStatus = true;
 function erase(e) {
     console.log(eraserStatus);
     eraserStatus = !eraserStatus;
+    if (randomColorMode)
+        randomColorMode = false;
     if (eraserStatus === false) {
         currentPrimaryColor = "#FFFFFF";
         eraser.style.backgroundColor = "#3ef32e";
