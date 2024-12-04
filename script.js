@@ -97,6 +97,9 @@ let randomColorMode = false;
 
 function changeColor(event) {
     if (event.type === "mousedown") {
+        if (eraserStatus) {
+            eraserStatus = !eraserStatus;
+        }
         if (randomColorMode) {
             let randomColor = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})`
             event.target.style.backgroundColor = (event.button === 0) ? randomColor : randomColor;
