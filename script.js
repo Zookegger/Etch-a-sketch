@@ -7,18 +7,26 @@ const body = document.getElementById("body");
 
 const buttonContainer = document.getElementById("button-container");
 const clear = createButton("Clear canvas", "clear-button", clearGrid);
-const primaryColorPicker = createColorPicker(DEFAULT_COLOR, "primaryColorPicker", (e) => currentPrimaryColor = e.target.value); 
-const secondaryColorPicker = createColorPicker(DEFAULT_COLOR, "secondaryColorPicker", (e) => currentSecondaryColor = e.target.value);
+const primaryColorPicker = createColorPicker(
+	DEFAULT_COLOR,
+	"primaryColorPicker",
+	(e) => (currentPrimaryColor = e.target.value)
+);
+const secondaryColorPicker = createColorPicker(
+	DEFAULT_COLOR,
+	"secondaryColorPicker",
+	(e) => (currentSecondaryColor = e.target.value)
+);
 const slider = document.createElement("input");
 slider.setAttribute("id", "slider");
 slider.type = "range";
-slider.min = "1"
-slider.max = "128";
+slider.min = "1";
+slider.max = "100";
 slider.step = "1";
 slider.value = 10;
 slider.addEventListener("input", () => {
-    sliderValue.value = slider.value;
-    setupGrid(slider.value);
+	sliderValue.value = slider.value;
+	setupGrid(slider.value);
 });
 
 const sliderValue = document.createElement("input");
@@ -26,46 +34,51 @@ sliderValue.setAttribute("id", "sliderValue");
 sliderValue.type = "text";
 sliderValue.value = slider.value;
 sliderValue.addEventListener("input", () => {
-    const value = Math.max(slider.min, Math.min(slider.max, sliderValue.value));
-    slider.value = value;
-    setupGrid(value);
-})
+	const value = Math.max(slider.min, Math.min(slider.max, sliderValue.value));
+	slider.value = value;
+	setupGrid(value);
+});
+
+const sliderContainer = document.createElement("div");
+sliderContainer.setAttribute("class", "slider-container");
+sliderContainer.appendChild(slider);
+sliderContainer.appendChild(sliderValue);
 
 function createColorPicker(color, id, inputHandler) {
-    const colorPicker = document.createElement("input");
-    colorPicker.setAttribute("id", id);
-    colorPicker.type = "color";
-    colorPicker.value = color;
-    colorPicker.addEventListener("input", inputHandler);
-    return colorPicker;
+	const colorPicker = document.createElement("input");
+	colorPicker.setAttribute("id", id);
+	colorPicker.type = "color";
+	colorPicker.value = color;
+	colorPicker.addEventListener("input", inputHandler);
+	return colorPicker;
 }
 
 let currentPrimaryColor = primaryColorPicker.value;
 let currentSecondaryColor = secondaryColorPicker.value;
 
-grid.addEventListener('contextmenu', (e) => e.preventDefault());
+grid.addEventListener("contextmenu", (e) => e.preventDefault());
 
 let mouseDown = false;
 let leftMouseDown = false;
 let rightMouseDown = false;
 
 document.body.onmousedown = (e) => {
-    mouseDown = true;
-    leftMouseDown = (e.button === 0);
-    rightMouseDown = (e.button === 2) ;
-}
+	mouseDown = true;
+	leftMouseDown = e.button === 0;
+	rightMouseDown = e.button === 2;
+};
 document.body.onmouseup = () => {
-    mouseDown = false;
-    leftMouseDown = false;
-    rightMouseDown = false;
-}
+	mouseDown = false;
+	leftMouseDown = false;
+	rightMouseDown = false;
+};
 
 function createButton(text, id, eventHandler) {
-    const button = document.createElement("button");
-    button.setAttribute("id" , id);
-    button.innerText = text;
-    button.addEventListener("mousedown", eventHandler);
-    return button;
+	const button = document.createElement("button");
+	button.setAttribute("id", id);
+	button.innerText = text;
+	button.addEventListener("mousedown", eventHandler);
+	return button;
 }
 
 const eraser = createButton("Eraser", "eraser-button", erase);
@@ -73,69 +86,80 @@ eraser.style.backgroundColor = "#FF0000";
 eraser.style.color = "#FFFFFF";
 
 function setupGrid(size) {
-    grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
-    grid.style.gridTemplateRows = `repeat(${size}, 1fr)`;
-    
-    grid.innerHTML = '';
-    
-    for (let i = 0; i < (size * size); i++) {
-        const pixel = document.createElement("div");
-        pixel.classList.add("grid-pixel");
-        
-        pixel.addEventListener("mousedown", changeColor);
-        pixel.addEventListener("mouseover", changeColor);
-        grid.appendChild(pixel);
-    }
+	grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+	grid.style.gridTemplateRows = `repeat(${size}, 1fr)`;
+
+	grid.innerHTML = "";
+
+	for (let i = 0; i < size * size; i++) {
+		const pixel = document.createElement("div");
+		pixel.classList.add("grid-pixel");
+
+		pixel.addEventListener("mousedown", changeColor);
+		pixel.addEventListener("mouseover", changeColor);
+		grid.appendChild(pixel);
+	}
 }
 
 const randomColorButton = document.getElementById("secret-random-button");
 randomColorButton.addEventListener("click", (e) => {
-    randomColorMode = !randomColorMode;
-    console.log(`Random color mode: ${randomColorMode}`);
+	randomColorMode = !randomColorMode;
+	console.log(`Random color mode: ${randomColorMode}`);
 });
 let randomColorMode = false;
 
 function changeColor(event) {
-    if (event.type === "mousedown") {
-        if (eraserStatus) {
-            eraserStatus = !eraserStatus;
-        }
-        if (randomColorMode) {
-            let randomColor = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})`
-            event.target.style.backgroundColor = (event.button === 0) ? randomColor : randomColor;
-        } else
-        event.target.style.backgroundColor = (event.button === 0) ? currentPrimaryColor : currentSecondaryColor;
-    }
-    
-    if (event.type === "mouseover" && mouseDown) {
-        if (randomColorMode) {
-            let randomColor = `rgb(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)})`
-            event.target.style.backgroundColor = (event.button === 0) ? randomColor : randomColor;
-        } else
-        event.target.style.backgroundColor = (leftMouseDown) ? currentPrimaryColor : currentSecondaryColor;
-    }
+	if (event.type === "mousedown") {
+		if (randomColorMode) {
+			let randomColor = `rgb(${Math.floor(
+				Math.random() * 255
+			)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(
+				Math.random() * 255
+			)})`;
+			event.target.style.backgroundColor =
+				event.button === 0 ? randomColor : randomColor;
+		} else
+			event.target.style.backgroundColor =
+				event.button === 0
+					? currentPrimaryColor
+					: currentSecondaryColor;
+	}
+
+	if (event.type === "mouseover" && mouseDown) {
+		if (randomColorMode) {
+			let randomColor = `rgb(${Math.floor(
+				Math.random() * 255
+			)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(
+				Math.random() * 255
+			)})`;
+			event.target.style.backgroundColor =
+				event.button === 0 ? randomColor : randomColor;
+		} else
+			event.target.style.backgroundColor = leftMouseDown
+				? currentPrimaryColor
+				: currentSecondaryColor;
+	}
 }
 
-let eraserStatus = true; 
+let eraserStatus = true;
 function erase(e) {
-    console.log(eraserStatus);
-    eraserStatus = !eraserStatus;
-    if (randomColorMode)
-        randomColorMode = false;
-    if (eraserStatus === false) {
-        currentPrimaryColor = "#FFFFFF";
-        eraser.style.backgroundColor = "#3ef32e";
-        eraser.style.color = "#000000";
-    }
-    if (eraserStatus === true) {
-        eraser.style.backgroundColor = "#FF0000";
-        eraser.style.color = "#FFFFFF";
-        currentPrimaryColor = primaryColorPicker.value;
-    }
+	console.log(eraserStatus);
+	eraserStatus = !eraserStatus;
+	if (randomColorMode) randomColorMode = false;
+	if (eraserStatus === false) {
+		currentPrimaryColor = "#FFFFFF";
+		eraser.style.backgroundColor = "#3ef32e";
+		eraser.style.color = "#000000";
+	}
+	if (eraserStatus === true) {
+		eraser.style.backgroundColor = "#FF0000";
+		eraser.style.color = "#FFFFFF";
+		currentPrimaryColor = primaryColorPicker.value;
+	}
 }
 
 function clearGrid() {
-    setupGrid(slider.value);
+	setupGrid(slider.value);
 }
 
 setupGrid(DEFAULT_SIZE);
@@ -145,12 +169,9 @@ eraser.style.height = `${DEFAULT_BUTTON_HEIGHT}px`;
 primaryColorPicker.style.height = `${DEFAULT_BUTTON_HEIGHT}px`;
 secondaryColorPicker.style.height = `${DEFAULT_BUTTON_HEIGHT}px`;
 
-sliderValue.style.width = '19px';
-
 buttonContainer.appendChild(clear);
 buttonContainer.appendChild(primaryColorPicker);
 buttonContainer.appendChild(secondaryColorPicker);
 buttonContainer.appendChild(eraser);
-buttonContainer.appendChild(slider);
-buttonContainer.appendChild(sliderValue);
+buttonContainer.appendChild(sliderContainer);
 body.appendChild(buttonContainer);
